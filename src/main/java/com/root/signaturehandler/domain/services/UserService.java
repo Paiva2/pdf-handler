@@ -5,6 +5,8 @@ import com.root.signaturehandler.domain.utils.EncrypterHandler;
 import com.root.signaturehandler.presentation.exceptions.BadRequestException;
 import com.root.signaturehandler.presentation.exceptions.ConflictException;
 import com.root.signaturehandler.infra.repositories.UserRepository;
+import com.root.signaturehandler.presentation.exceptions.ForbiddenException;
+import com.root.signaturehandler.presentation.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -35,5 +37,24 @@ public class UserService {
         newUser.setPassword(hashedPassword);
 
         return this.userRepository.save(newUser);
+    }
+
+    public User authUser(User user) {
+        Optional<User> doesUserExists = this.userRepository.findByEmail(user.getEmail());
+
+        System.out.println(user.getEmail());
+
+        if (!doesUserExists.isPresent()) {
+            throw new NotFoundException("User not found.");
+        }
+
+        boolean doesPasswordsMatches = this.encrypterHandler
+                .compare(user.getPassword(), doesUserExists.get().getPassword());
+
+        if (!doesPasswordsMatches) {
+            throw new ForbiddenException("Wrong credentials.");
+        }
+
+        return doesUserExists.get();
     }
 }

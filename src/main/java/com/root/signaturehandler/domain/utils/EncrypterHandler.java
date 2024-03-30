@@ -10,4 +10,8 @@ public class EncrypterHandler {
     public String encrypt(String toEncrypt) {
         return this.bcrypt.encode(toEncrypt);
     }
+
+    public boolean compare(String base, String hashed) {
+        return this.bcrypt.matches(base, hashed);
+    }
 }
