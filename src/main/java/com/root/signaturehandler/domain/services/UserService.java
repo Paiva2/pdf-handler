@@ -7,10 +7,15 @@ import com.root.signaturehandler.presentation.exceptions.ConflictException;
 import com.root.signaturehandler.infra.repositories.UserRepository;
 import com.root.signaturehandler.presentation.exceptions.ForbiddenException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.beans.PropertyDescriptor;
+import java.sql.Array;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -42,7 +47,7 @@ public class UserService {
 
     public User authUser(User user) {
         Optional<User> doesUserExists = this.userRepository.findByEmail(user.getEmail());
-        
+
         if (!doesUserExists.isPresent()) {
             throw new NotFoundException("User not found.");
         }
@@ -69,5 +74,62 @@ public class UserService {
         }
 
         return doesUserExists.get();
+    }
+
+    public User updateProfile(User updatedUser) {
+        if (updatedUser == null) {
+            throw new BadRequestException("updatedUser can't be null");
+        }
+
+        if (updatedUser.getId() == null) {
+            throw new BadRequestException("updatedUser Id can't be null");
+        }
+
+        Optional<User> doesUserExists = this.userRepository.findById(updatedUser.getId());
+
+        if (!doesUserExists.isPresent()) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (updatedUser.getPassword() != null) {
+            if (updatedUser.getPassword().length() < 6) {
+                throw new BadRequestException("password can't be less than 6 characters");
+            } else {
+                String hashNewPassword = this.encrypterHandler.encrypt(updatedUser.getPassword());
+
+                updatedUser.setPassword(hashNewPassword);
+            }
+        }
+
+        if (updatedUser.getEmail() != null) {
+            Optional<User> doesEmailIsAlreadyRegistered = this.userRepository.findByEmail(updatedUser.getEmail());
+
+            if (doesEmailIsAlreadyRegistered.isPresent()) {
+                User existentEmail = doesEmailIsAlreadyRegistered.get();
+
+                if (existentEmail.getId().hashCode() != updatedUser.getId().hashCode()) {
+                    throw new ConflictException("Provided new e-mail already exists");
+                }
+            }
+        }
+
+        BeanWrapper target = new BeanWrapperImpl(doesUserExists.get());
+        BeanWrapper sourceUpdated = new BeanWrapperImpl(updatedUser);
+
+        PropertyDescriptor[] fields = sourceUpdated.getPropertyDescriptors();
+
+        for (PropertyDescriptor field : fields) {
+            String fieldName = field.getName();
+            Object newValue = sourceUpdated.getPropertyValue(fieldName);
+
+            boolean nonUpdatableFields =
+                    fieldName.hashCode() == "class".hashCode() || fieldName.hashCode() == "id".hashCode();
+
+            if (!nonUpdatableFields && newValue != null) {
+                target.setPropertyValue(fieldName, newValue);
+            }
+        }
+
+        return this.userRepository.save(doesUserExists.get());
     }
 }

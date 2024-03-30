@@ -2,6 +2,7 @@ package com.root.signaturehandler.presentation.controllers;
 
 import com.root.signaturehandler.presentation.dtos.in.AuthUserDTO;
 import com.root.signaturehandler.presentation.dtos.in.RegisterUserDTO;
+import com.root.signaturehandler.presentation.dtos.in.UpdateUserDTO;
 import com.root.signaturehandler.presentation.dtos.out.FetchUserProfileDTO;
 import com.root.signaturehandler.presentation.dtos.out.UserAuthenticatedDTO;
 import com.root.signaturehandler.presentation.dtos.out.UserCreatedDTO;
@@ -62,5 +63,24 @@ public class UserController {
         );
 
         return ResponseEntity.status(200).body(fetchProfileDto);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<FetchUserProfileDTO> updateProfile(
+            @RequestBody UpdateUserDTO dto,
+            @RequestHeader(name = "Authorization") String authToken
+    ) {
+        String parseToken = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        User updatedUser = this.userService.updateProfile(dto.toUser(UUID.fromString(parseToken)));
+
+        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(
+                updatedUser.getId(),
+                updatedUser.getEmail(),
+                updatedUser.getName(),
+                updatedUser.getCreatedAt()
+        );
+
+        return ResponseEntity.status(201).body(fetchProfileDto);
     }
 }
