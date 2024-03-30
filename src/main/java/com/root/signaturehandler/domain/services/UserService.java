@@ -10,6 +10,7 @@ import com.root.signaturehandler.presentation.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -41,9 +42,7 @@ public class UserService {
 
     public User authUser(User user) {
         Optional<User> doesUserExists = this.userRepository.findByEmail(user.getEmail());
-
-        System.out.println(user.getEmail());
-
+        
         if (!doesUserExists.isPresent()) {
             throw new NotFoundException("User not found.");
         }
@@ -53,6 +52,20 @@ public class UserService {
 
         if (!doesPasswordsMatches) {
             throw new ForbiddenException("Wrong credentials.");
+        }
+
+        return doesUserExists.get();
+    }
+
+    public User getProfile(UUID userId) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be empty.");
+        }
+
+        Optional<User> doesUserExists = this.userRepository.findById(userId);
+
+        if (!doesUserExists.isPresent()) {
+            throw new NotFoundException("User not found");
         }
 
         return doesUserExists.get();

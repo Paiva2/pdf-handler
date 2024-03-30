@@ -2,18 +2,17 @@ package com.root.signaturehandler.presentation.controllers;
 
 import com.root.signaturehandler.presentation.dtos.in.AuthUserDTO;
 import com.root.signaturehandler.presentation.dtos.in.RegisterUserDTO;
+import com.root.signaturehandler.presentation.dtos.out.FetchUserProfileDTO;
 import com.root.signaturehandler.presentation.dtos.out.UserAuthenticatedDTO;
 import com.root.signaturehandler.presentation.dtos.out.UserCreatedDTO;
 import com.root.signaturehandler.domain.entities.User;
 import com.root.signaturehandler.domain.services.UserService;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -45,5 +44,23 @@ public class UserController {
         UserAuthenticatedDTO userAuthenticatedDTO = new UserAuthenticatedDTO(token);
 
         return ResponseEntity.status(200).body(userAuthenticatedDTO);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<FetchUserProfileDTO> fetchProfile(
+            @RequestHeader(name = "Authorization") String authorizationHeader
+    ) {
+        String parseToken = this.jwtAdapter.verify(authorizationHeader.replace("Bearer ", ""));
+
+        User user = this.userService.getProfile(UUID.fromString(parseToken));
+
+        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getCreatedAt()
+        );
+
+        return ResponseEntity.status(200).body(fetchProfileDto);
     }
 }
