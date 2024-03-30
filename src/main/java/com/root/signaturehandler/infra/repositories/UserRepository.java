@@ -1,6 +1,6 @@
-package com.root.signaturehandler.repositories;
+package com.root.signaturehandler.infra.repositories;
 
-import com.root.signaturehandler.entities.User;
+import com.root.signaturehandler.domain.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

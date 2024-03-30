@@ -1,12 +1,12 @@
-package com.root.signaturehandler.entities;
+package com.root.signaturehandler.domain.entities;
 
-import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+
+import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -18,18 +18,18 @@ import java.util.UUID;
 @Table(name = "tb_users")
 public class User implements Serializable {
     @Id()
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @Column(nullable = false)
-    String name;
+    private String name;
 
     @Column(nullable = false, unique = true)
-    String email;
+    private String email;
 
     @Column(nullable = false)
-    String password;
-
+    private String password;
+    
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt = new Date();

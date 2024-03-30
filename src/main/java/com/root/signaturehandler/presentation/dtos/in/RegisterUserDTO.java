@@ -1,12 +1,13 @@
-package com.root.signaturehandler.dtos.in;
+package com.root.signaturehandler.presentation.dtos.in;
 
 
-import com.root.signaturehandler.entities.User;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.root.signaturehandler.domain.entities.User;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 public class RegisterUserDTO {

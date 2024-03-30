@@ -1,20 +1,16 @@
-package com.root.signaturehandler.controllers;
+package com.root.signaturehandler.presentation.controllers;
 
-import com.root.signaturehandler.dtos.in.RegisterUserDTO;
-import com.root.signaturehandler.dtos.out.UserCreatedDTO;
-import com.root.signaturehandler.entities.User;
-import com.root.signaturehandler.services.UserService;
-import jakarta.validation.Valid;
-import org.apache.catalina.mapper.Mapper;
+import com.root.signaturehandler.presentation.dtos.in.RegisterUserDTO;
+import com.root.signaturehandler.presentation.dtos.out.UserCreatedDTO;
+import com.root.signaturehandler.domain.entities.User;
+import com.root.signaturehandler.domain.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import javax.validation.Valid;
 
 @RestController()
 @RequestMapping("/api/v1/user")

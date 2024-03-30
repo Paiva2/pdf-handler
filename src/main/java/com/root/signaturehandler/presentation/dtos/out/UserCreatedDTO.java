@@ -1,9 +1,8 @@
-package com.root.signaturehandler.dtos.out;
+package com.root.signaturehandler.presentation.dtos.out;
 
-import com.root.signaturehandler.entities.User;
+import com.root.signaturehandler.domain.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -11,11 +10,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class UserCreatedDTO {
     private String message = "User created successfully!";
-
     private String email;
-
     private String name;
-
     private Date createdAt;
 
     public UserCreatedDTO(User user) {
