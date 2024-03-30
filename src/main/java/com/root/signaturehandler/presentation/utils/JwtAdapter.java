@@ -19,8 +19,8 @@ public class JwtAdapter {
     @Value("${api.security.token.secret}")
     protected String privateKey;
     protected String issuer = "pdf-handler-api";
-    protected Integer expirationTime = 2;
-    
+    protected Integer expirationTime = 7;
+
     public String generate(UUID subject) {
         Algorithm algorithm = Algorithm.HMAC256(this.privateKey);
 
@@ -39,13 +39,13 @@ public class JwtAdapter {
 
             JWTVerifier verifier = JWT.require(algorithm).withIssuer(this.issuer).build();
 
-            return verifier.verify(token).getSubject();
+            return verifier.verify(token.trim()).getSubject();
         } catch (JWTDecodeException exception) {
             throw new BadRequestException(exception.getMessage());
         }
     }
 
     private Instant tokenExpiration() {
-        return LocalDateTime.now().plusHours(this.expirationTime).atOffset(ZoneOffset.of("+0")).toInstant();
+        return LocalDateTime.now().plusDays(this.expirationTime).atOffset(ZoneOffset.of("+0")).toInstant();
     }
 }
