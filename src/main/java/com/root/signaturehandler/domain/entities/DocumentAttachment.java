@@ -1,5 +1,6 @@
 package com.root.signaturehandler.domain.entities;
 
+import com.root.signaturehandler.infra.models.enums.SendBy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,10 @@ public class DocumentAttachment implements Serializable {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Date updatedAt = new Date();
+
+    @Column(name = "send_by", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SendBy sendBy;
 
     @ManyToOne
     @JoinColumn(name = "fk_document_id")

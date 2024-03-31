@@ -20,11 +20,16 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "tb_folders")
+@Table(name = "tb_folders", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"fk_user", "name"})
+})
 public class Folder implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+
+    @Column(nullable = false, unique = true)
+    private String name;
 
     @CreationTimestamp
     @Column(nullable = false, name = "created_at", updatable = false)
