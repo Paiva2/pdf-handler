@@ -1,12 +1,7 @@
 package com.root.signaturehandler.domain.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -43,12 +38,12 @@ public class Contact {
     @Column(name = "updated_at", nullable = false)
     private Date updatedAt = new Date();
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_user")
     private User user;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "contact")
+    @JsonIgnore
+    @OneToMany(mappedBy = "contact", fetch = FetchType.LAZY)
     private List<DocumentAttachment> attachments;
 }

@@ -9,7 +9,6 @@ import com.root.signaturehandler.presentation.exceptions.ConflictException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

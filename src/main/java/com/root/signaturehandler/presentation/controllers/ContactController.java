@@ -5,9 +5,13 @@ import com.root.signaturehandler.domain.services.ContactService;
 import com.root.signaturehandler.presentation.dtos.in.contact.RegisterContactDTO;
 import com.root.signaturehandler.presentation.dtos.out.ContactResponseDTO;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,5 +43,26 @@ public class ContactController {
         );
 
         return ResponseEntity.status(201).body(contactResponseDTO);
+    }
+
+    @GetMapping("/list-all")
+    public ResponseEntity<Page<Contact>> filterUserContacts(
+            @RequestHeader("Authorization") String authToken,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "email", required = false) String email
+    ) {
+        String parseTokenSubject = this.jwtAdapter.verify(authToken.replace("Bearer", ""));
+
+        Page<Contact> contactList = this.contactService.filterUserContacts(
+                UUID.fromString(parseTokenSubject),
+                page,
+                size,
+                email,
+                name
+        );
+
+        return ResponseEntity.status(200).body(contactList);
     }
 }

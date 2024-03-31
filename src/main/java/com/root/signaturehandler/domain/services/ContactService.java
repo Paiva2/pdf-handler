@@ -4,11 +4,18 @@ import com.root.signaturehandler.domain.entities.Contact;
 import com.root.signaturehandler.domain.entities.User;
 import com.root.signaturehandler.infra.repositories.ContactRepository;
 import com.root.signaturehandler.infra.repositories.UserRepository;
+import com.root.signaturehandler.infra.specifications.ContactSpecification;
 import com.root.signaturehandler.presentation.exceptions.BadRequestException;
 import com.root.signaturehandler.presentation.exceptions.ConflictException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -17,10 +24,16 @@ import java.util.regex.Pattern;
 public class ContactService {
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
+    private final ContactSpecification contactSpecification;
 
-    public ContactService(ContactRepository contactRepository, UserRepository userRepository) {
+    public ContactService(
+            ContactRepository contactRepository,
+            UserRepository userRepository,
+            ContactSpecification contactSpecification
+    ) {
         this.contactRepository = contactRepository;
         this.userRepository = userRepository;
+        this.contactSpecification = contactSpecification;
     }
 
     public Contact registerNew(UUID userId, Contact contact) {
@@ -52,6 +65,43 @@ public class ContactService {
         contact.setUser(doesUserExists.get());
 
         return this.contactRepository.save(contact);
+    }
+
+    public Page<Contact> filterUserContacts(
+            UUID userId,
+            int page,
+            int size,
+            String email,
+            String name
+    ) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be null");
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+
+        if (size < 5) {
+            size = 5;
+        } else if (size > 100) {
+            size = 100;
+        }
+
+        Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        ContactSpecification specification = this.contactSpecification;
+
+        Specification<Contact> filters =
+                Specification.where(specification.userIdEq(userId))
+                        .and(name != null ? specification.nameLike(name) :
+                                email != null ? specification.emailLike(email) : null);
+
+        Page<Contact> getContacts = this.contactRepository.findAll(filters, pageable);
+
+        return getContacts;
     }
 
     private boolean phoneValidation(String phone) {
