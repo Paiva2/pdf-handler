@@ -1,5 +1,8 @@
 package com.root.signaturehandler.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,10 +43,12 @@ public class Contact {
     @Column(name = "updated_at", nullable = false)
     private Date updatedAt = new Date();
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_user")
     private User user;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "contact")
     private List<DocumentAttachment> attachments;
 }

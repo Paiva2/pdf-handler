@@ -11,6 +11,15 @@ import java.util.UUID;
 
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, UUID>, FolderModel {
-    @Query(value = "SELECT * FROM tb_folders WHERE fk_user = :userId AND name = :folderName", nativeQuery = true)
-    Optional<Folder> findUserFolder(UUID userId, String folderName);
+    @Query("SELECT fold FROM Folder fold" +
+            " LEFT JOIN FETCH fold.user usr INNER JOIN FETCH fold.documents doc " +
+            " WHERE fold.user.id = :userId AND fold.name = :folderName"
+    )
+    Optional<Folder> findUserFolderByName(UUID userId, String folderName);
+
+    @Query("SELECT fold FROM Folder fold " +
+            " LEFT JOIN FETCH fold.documents doc " +
+            " WHERE fold.user.id = :userId AND fold.id = :folderId"
+    )
+    Optional<Folder> findUserFolderById(UUID userId, Long folderId);
 }

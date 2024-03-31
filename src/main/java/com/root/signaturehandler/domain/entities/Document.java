@@ -1,5 +1,6 @@
 package com.root.signaturehandler.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,10 +38,12 @@ public class Document {
     @Column(name = "updated_at", nullable = false)
     private Date updatedAt = new Date();
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_folder")
     private Folder folder;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "document")
     private List<DocumentAttachment> documentAttachments;
 }

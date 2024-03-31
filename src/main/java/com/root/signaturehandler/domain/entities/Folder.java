@@ -1,9 +1,7 @@
 package com.root.signaturehandler.domain.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -13,7 +11,6 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,8 +22,8 @@ import java.util.UUID;
 })
 public class Folder implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -39,11 +36,11 @@ public class Folder implements Serializable {
     @Column(nullable = false, name = "updated_at")
     private Date updatedAt = new Date();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_user")
     private User user;
 
-    @OneToMany(mappedBy = "folder")
+    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     List<Document> documents;
 }

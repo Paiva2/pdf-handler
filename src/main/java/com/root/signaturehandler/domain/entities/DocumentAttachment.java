@@ -1,5 +1,6 @@
 package com.root.signaturehandler.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.root.signaturehandler.infra.models.enums.SendBy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,11 +37,11 @@ public class DocumentAttachment implements Serializable {
     @Enumerated(EnumType.STRING)
     private SendBy sendBy;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_document_id")
     private Document document;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_contact_id")
     private Contact contact;
 }

@@ -3,12 +3,14 @@ package com.root.signaturehandler.presentation.controllers;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.services.FolderService;
 import com.root.signaturehandler.presentation.dtos.in.folder.CreateFolderDTO;
+import com.root.signaturehandler.presentation.dtos.out.FolderResponseDTO;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,5 +41,24 @@ public class FolderController {
         }};
 
         return ResponseEntity.status(201).body(responseMap);
+    }
+
+    @GetMapping("/{folderId}")
+    public ResponseEntity<FolderResponseDTO> filterFolderById(
+            @RequestHeader("Authorization") String authToken,
+            @PathVariable(name = "folderId") Long folderId
+    ) {
+        String parseTokenSubject = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        Folder getFolder = this.folderService.filterFolder(UUID.fromString(parseTokenSubject), folderId);
+
+        FolderResponseDTO folderResponseDTO = new FolderResponseDTO(
+                getFolder.getId(),
+                getFolder.getName(),
+                getFolder.getCreatedAt(),
+                getFolder.getDocuments()
+        );
+
+        return ResponseEntity.status(200).body(folderResponseDTO);
     }
 }
