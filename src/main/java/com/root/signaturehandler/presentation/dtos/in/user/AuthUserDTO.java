@@ -1,4 +1,4 @@
-package com.root.signaturehandler.presentation.dtos.in;
+package com.root.signaturehandler.presentation.dtos.in.user;
 
 import com.root.signaturehandler.domain.entities.User;
 import lombok.Data;

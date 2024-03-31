@@ -1,8 +1,8 @@
 package com.root.signaturehandler.presentation.controllers;
 
-import com.root.signaturehandler.presentation.dtos.in.AuthUserDTO;
-import com.root.signaturehandler.presentation.dtos.in.RegisterUserDTO;
-import com.root.signaturehandler.presentation.dtos.in.UpdateUserDTO;
+import com.root.signaturehandler.presentation.dtos.in.user.AuthUserDTO;
+import com.root.signaturehandler.presentation.dtos.in.user.RegisterUserDTO;
+import com.root.signaturehandler.presentation.dtos.in.user.UpdateUserDTO;
 import com.root.signaturehandler.presentation.dtos.out.FetchUserProfileDTO;
 import com.root.signaturehandler.presentation.dtos.out.UserAuthenticatedDTO;
 import com.root.signaturehandler.presentation.dtos.out.UserCreatedDTO;

@@ -7,15 +7,12 @@ import com.root.signaturehandler.presentation.exceptions.ConflictException;
 import com.root.signaturehandler.infra.repositories.UserRepository;
 import com.root.signaturehandler.presentation.exceptions.ForbiddenException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 
 import java.beans.PropertyDescriptor;
-import java.sql.Array;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
