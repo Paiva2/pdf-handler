@@ -10,16 +10,25 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface FolderRepository extends JpaRepository<Folder, UUID>, FolderModel {
+public interface FolderRepository extends JpaRepository<Folder, Long>, FolderModel {
+    @Override
     @Query("SELECT fold FROM Folder fold" +
             " LEFT JOIN FETCH fold.user usr INNER JOIN FETCH fold.documents doc " +
             " WHERE fold.user.id = :userId AND fold.name = :folderName"
     )
     Optional<Folder> findUserFolderByName(UUID userId, String folderName);
 
+    @Override
     @Query("SELECT fold FROM Folder fold " +
             " LEFT JOIN FETCH fold.documents doc " +
             " WHERE fold.user.id = :userId AND fold.id = :folderId"
     )
     Optional<Folder> findUserFolderById(UUID userId, Long folderId);
+
+    @Override
+    @Query("SELECT fold FROM Folder fold " +
+            " LEFT JOIN FETCH fold.documents doc " +
+            " WHERE fold.id = :folderId"
+    )
+    Optional<Folder> findById(Long folderId);
 }

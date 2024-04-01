@@ -11,9 +11,11 @@ import java.util.UUID;
 
 @Repository
 public interface UserRepository extends UserModel, JpaRepository<User, UUID> {
+    @Override
     @Query(value = "SELECT * FROM tb_users WHERE email = :email", nativeQuery = true)
     Optional<User> findByEmail(String email);
 
+    @Override
     @Query(value = "SELECT * FROM tb_users WHERE id = :id", nativeQuery = true)
     Optional<User> findById(UUID id);
 }

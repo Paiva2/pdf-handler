@@ -16,11 +16,10 @@ import java.util.UUID;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, UUID>, ContactModel, JpaSpecificationExecutor<Contact> {
 
+    @Override
     @Query(value = "SELECT contact.* FROM tb_contacts AS contact " +
             "WHERE contact.fk_user = :userId AND (contact.phone = :phone OR contact.email = :email)",
             nativeQuery = true
     )
     Optional<Contact> findUserContact(UUID userId, String email, String phone);
-
-    //Page<Contact> findAll(Specification<Contact> specification, Pageable pageable);
 }

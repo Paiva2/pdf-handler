@@ -10,4 +10,6 @@ public interface FolderModel {
     Optional<Folder> findUserFolderByName(UUID userId, String folderName);
 
     Optional<Folder> findUserFolderById(UUID userId, Long folderId);
+
+    Optional<Folder> findById(Long id);
 }
