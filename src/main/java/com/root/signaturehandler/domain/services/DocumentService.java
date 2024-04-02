@@ -16,6 +16,7 @@ import com.root.signaturehandler.presentation.exceptions.MailNotFoundException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,9 +50,12 @@ public class DocumentService {
     public Document sendDocument(
             UUID userId,
             Document document,
-            HashSet<ContactForSendDTO> contactsForSendDto) {
+            List<ContactForSendDTO> contactsForSendDto) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be empty");
+        }
+
         ArrayList<String> requiredFields = new ArrayList<String>() {{
-            add("userId");
             add("folder");
             add("fileName");
             add("fileBinary");
@@ -74,6 +78,7 @@ public class DocumentService {
             document.setFileName(document.getFileName() + "-" + LocalDateTime.now());
         }
 
+        document.setFolder(doesFolderExists.get());
         Document createDoc = this.documentRepository.save(document);
 
         List<Contact> userContactsToReceive = this.contactRepository.findContactsByIdByUserId(
@@ -112,7 +117,9 @@ public class DocumentService {
             newAttachmentsForDocument.add(attachment);
         });
 
-        this.documentAttachmentRepository.saveAll(newAttachmentsForDocument);
+        List<DocumentAttachment> newAttachments = this.documentAttachmentRepository.saveAll(newAttachmentsForDocument);
+
+        createDoc.setDocumentAttachments(newAttachments);
 
         return createDoc;
     }

@@ -1,18 +1,19 @@
 package com.root.signaturehandler.presentation.controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.root.signaturehandler.domain.entities.Document;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.services.DocumentService;
-import com.root.signaturehandler.presentation.dtos.in.document.NewDocumentDTO;
+import com.root.signaturehandler.presentation.dtos.in.contact.ContactForSendDTO;
 import com.root.signaturehandler.presentation.dtos.out.NewDocumentResponseDTO;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 
 @RestController
@@ -27,40 +28,33 @@ public class DocumentController {
         this.jwtAdapter = jwtAdapter;
     }
 
-    @PostMapping(value = "/new/{folderId}", consumes = {
-            MediaType.APPLICATION_JSON_VALUE,
-            MediaType.MULTIPART_FORM_DATA_VALUE,
-            MediaType.APPLICATION_PDF_VALUE
-    })
+    @PostMapping(value = "/new/{folderId}", consumes = {"multipart/form-data"})
     public ResponseEntity<Object> sendDocument(
-            @RequestBody @Valid NewDocumentDTO newDocumentDTO,
+            @RequestParam(value = "contactsForSend", required = false) String contactsForSend,
+            @RequestPart(value = "document") MultipartFile file,
             @RequestHeader("Authorization") String authToken,
-            @PathVariable(name = "folderId") Long folderId,
-            @RequestPart("documents") MultipartFile file
-    ) {
+            @PathVariable(name = "folderId") Long folderId
+    ) throws IOException {
         String parseToken = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        Type listDtoType = new TypeToken<ArrayList<ContactForSendDTO>>() {
+        }.getType();
+
+        List<ContactForSendDTO> getDtoConverted = new Gson().fromJson(contactsForSend, listDtoType);
 
         Document document = new Document();
         Folder folder = new Folder();
         folder.setId(folderId);
 
-        try {
-            document.setFileName(file.getOriginalFilename());
-            document.setFileBinary(file.getBytes());
+        document.setFileName(file.getOriginalFilename());
+        document.setFileBinary(file.getBytes());
 
-            document.setFolder(folder);
-        } catch (IOException exception) {
-            System.out.println(exception.getMessage());
-
-            return ResponseEntity.badRequest().body(
-                    Collections.singletonMap("message", "Error while getting file bytes...")
-            );
-        }
+        document.setFolder(folder);
 
         Document documentCreated = this.documentService.sendDocument(
                 UUID.fromString(parseToken),
                 document,
-                newDocumentDTO.getContactsForSend()
+                getDtoConverted
         );
 
         NewDocumentResponseDTO newDocumentResponseDTO = new NewDocumentResponseDTO(
