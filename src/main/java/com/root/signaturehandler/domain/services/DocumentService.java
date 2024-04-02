@@ -16,7 +16,6 @@ import com.root.signaturehandler.presentation.exceptions.MailNotFoundException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +88,7 @@ public class DocumentService {
                         .collect(Collectors.toList())
         );
 
-        Set<DocumentAttachment> newAttachmentsForDocument = new HashSet<>();
+        List<DocumentAttachment> newAttachmentsForDocument = new ArrayList<>();
 
         contactsForSendDto.forEach(contactForSend -> {
             Optional<Contact> contact = userContactsToReceive

@@ -2,6 +2,8 @@ package com.root.signaturehandler.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -45,5 +47,6 @@ public class Contact {
 
     @JsonIgnore
     @OneToMany(mappedBy = "contact", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     private List<DocumentAttachment> attachments;
 }

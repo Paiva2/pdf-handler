@@ -2,9 +2,6 @@ package com.root.signaturehandler.infra.repositories;
 
 import com.root.signaturehandler.domain.entities.Contact;
 import com.root.signaturehandler.infra.models.ContactModel;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

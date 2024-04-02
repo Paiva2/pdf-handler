@@ -22,8 +22,8 @@ import java.util.UUID;
 @Table(name = "tb_document_attachments")
 public class DocumentAttachment implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
