@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,4 +23,8 @@ public interface ContactRepository extends JpaRepository<Contact, UUID>, Contact
             nativeQuery = true
     )
     Optional<Contact> findUserContact(UUID userId, String email, String phone);
+
+    @Override
+    @Query(value = "SELECT * FROM tb_contacts WHERE fk_user = :userId AND id IN (:contactIds)", nativeQuery = true)
+    List<Contact> findContactsByIdByUserId(UUID userId, List<UUID> contactIds);
 }
