@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 /src/main/resources/*.env
 /src/main/resources/secret.properties
-
+.DS_Store
 
 ### STS ###
 .apt_generated
