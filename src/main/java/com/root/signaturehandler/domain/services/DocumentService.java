@@ -5,6 +5,7 @@ import com.root.signaturehandler.domain.entities.Document;
 import com.root.signaturehandler.domain.entities.DocumentAttachment;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.utils.EmailHandlerAdapter;
+import com.root.signaturehandler.domain.utils.FileUploaderAdapter;
 import com.root.signaturehandler.infra.models.enums.SendBy;
 import com.root.signaturehandler.infra.repositories.ContactRepository;
 import com.root.signaturehandler.infra.repositories.DocumentAttachmentRepository;
@@ -16,33 +17,41 @@ import com.root.signaturehandler.presentation.exceptions.MailNotFoundException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class DocumentService {
+    @Value("${aws.bucket.documents.name}")
+    private String destinationForDocuments;
+
     private final FolderRepository folderRepository;
     private final DocumentRepository documentRepository;
     private final ContactRepository contactRepository;
     private final DocumentAttachmentRepository documentAttachmentRepository;
     private final EmailHandlerAdapter emailHandlerAdapter;
+    private final FileUploaderAdapter fileUploaderAdapter;
 
     public DocumentService(
             FolderRepository folderRepository,
             DocumentRepository documentRepository,
             DocumentAttachmentRepository documentAttachmentRepository,
             ContactRepository contactRepository,
-            EmailHandlerAdapter emailHandlerAdapter
+            EmailHandlerAdapter emailHandlerAdapter,
+            FileUploaderAdapter fileUploaderAdapter
     ) {
         this.folderRepository = folderRepository;
         this.documentRepository = documentRepository;
         this.documentAttachmentRepository = documentAttachmentRepository;
         this.emailHandlerAdapter = emailHandlerAdapter;
         this.contactRepository = contactRepository;
+        this.fileUploaderAdapter = fileUploaderAdapter;
     }
 
     @Transactional(noRollbackFor = MailNotFoundException.class)
@@ -74,7 +83,7 @@ public class DocumentService {
         );
 
         if (doesFolderHasDocumentWithName.isPresent()) {
-            document.setFileName(document.getFileName() + "-" + LocalDateTime.now());
+            document.setFileName(this.randomFileName(document.getFileName()));
         }
 
         document.setFolder(doesFolderExists.get());
@@ -106,21 +115,43 @@ public class DocumentService {
             attachment.setContact(contact.get());
             attachment.setSendBy(contactForSend.getSendBy());
 
+            String documentUrl;
+
+            try {
+                this.fileUploaderAdapter.setDocumentsDestination(this.destinationForDocuments);
+                documentUrl = this.fileUploaderAdapter.uploadDocument(
+                        document.getOriginalFile(),
+                        document.getFileName()
+                );
+            } catch (IOException exception) {
+                System.out.println(exception.getMessage());
+                throw new BadRequestException("There was an error uploading the document...");
+            }
+
             if (attachment.getSendBy() == SendBy.EMAIL) {
                 this.emailHandlerAdapter.sendDocumentMailMessage(
                         contact.get().getEmail(),
-                        "https://linktos3bucketwithpdf.com.br" // TODO: IMPLEMENT S3 BUCKET TO UPLOAD DOC
+                        documentUrl
                 );
             }
 
             newAttachmentsForDocument.add(attachment);
         });
 
-        List<DocumentAttachment> newAttachments = this.documentAttachmentRepository.saveAll(newAttachmentsForDocument);
+        List<DocumentAttachment> newAttachments = this.documentAttachmentRepository.saveAll(
+                newAttachmentsForDocument
+        );
 
         createDoc.setDocumentAttachments(newAttachments);
 
         return createDoc;
+    }
+
+    private String randomFileName(String originalFileName) {
+        return originalFileName + "_" + LocalDateTime.now()
+                .toString()
+                .replaceAll(":", "_")
+                .concat(String.valueOf(LocalDateTime.now().getNano() * 10 ^ 5));
     }
 
     private void serviceDtoValidation(Object dto, ArrayList<String> requiredFields) {

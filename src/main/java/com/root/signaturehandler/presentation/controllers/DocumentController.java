@@ -48,8 +48,8 @@ public class DocumentController {
 
         document.setFileName(file.getOriginalFilename());
         document.setFileBinary(file.getBytes());
-
         document.setFolder(folder);
+        document.setOriginalFile(file);
 
         Document documentCreated = this.documentService.sendDocument(
                 UUID.fromString(parseToken),

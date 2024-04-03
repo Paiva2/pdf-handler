@@ -9,6 +9,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -49,4 +50,7 @@ public class Document {
     @OneToMany(mappedBy = "document")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DocumentAttachment> documentAttachments;
+
+    @Transient
+    private MultipartFile originalFile;
 }

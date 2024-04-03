@@ -9,11 +9,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EmailHandlerAdapter implements MailHandlerModel {
-    @Autowired
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username}")
     private String mailFrom;
+
+    public EmailHandlerAdapter(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
 
     public void sendDocumentMailMessage(String emailTo, String documentUrl) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
