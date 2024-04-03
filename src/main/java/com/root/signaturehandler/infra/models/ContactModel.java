@@ -17,4 +17,8 @@ public interface ContactModel {
     Page<Contact> findAll(Specification<Contact> filter, Pageable pageable);
 
     List<Contact> findContactsByIdByUserId(UUID userId, List<UUID> contactsId);
+
+    Optional<Contact> findByUserId(UUID contactId, UUID userId);
+
+    Optional<Contact> deleteByIdModel(UUID contactId);
 }

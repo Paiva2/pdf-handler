@@ -47,6 +47,6 @@ public class Contact {
 
     @JsonIgnore
     @OneToMany(mappedBy = "contact", fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DocumentAttachment> attachments;
 }

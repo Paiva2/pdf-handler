@@ -1,6 +1,5 @@
 package com.root.signaturehandler.domain.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.root.signaturehandler.infra.models.enums.SendBy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +11,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,7 +39,7 @@ public class DocumentAttachment implements Serializable {
     @JoinColumn(name = "fk_document_id")
     private Document document;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "fk_contact_id")
     private Contact contact;
 }

@@ -5,12 +5,11 @@ import com.root.signaturehandler.domain.services.ContactService;
 import com.root.signaturehandler.presentation.dtos.in.contact.RegisterContactDTO;
 import com.root.signaturehandler.presentation.dtos.out.ContactResponseDTO;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.ws.Response;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,5 +63,17 @@ public class ContactController {
         );
 
         return ResponseEntity.status(200).body(contactList);
+    }
+
+    @DeleteMapping("{contactId}")
+    public ResponseEntity<Void> deleteContact(
+            @PathVariable(name = "contactId") UUID contactId,
+            @RequestHeader("Authorization") String authToken
+    ) {
+        String parseTokenSubject = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        this.contactService.removeContact(UUID.fromString(parseTokenSubject), contactId);
+
+        return ResponseEntity.status(204).build();
     }
 }

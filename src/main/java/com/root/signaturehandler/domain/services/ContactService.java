@@ -7,6 +7,7 @@ import com.root.signaturehandler.infra.repositories.UserRepository;
 import com.root.signaturehandler.infra.specifications.ContactSpecification;
 import com.root.signaturehandler.presentation.exceptions.BadRequestException;
 import com.root.signaturehandler.presentation.exceptions.ConflictException;
+import com.root.signaturehandler.presentation.exceptions.ForbiddenException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -102,6 +103,24 @@ public class ContactService {
         Page<Contact> getContacts = this.contactRepository.findAll(filters, pageable);
 
         return getContacts;
+    }
+
+    @Transactional
+    public void removeContact(UUID userId, UUID contactId) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be empty");
+        }
+
+        if (contactId == null) {
+            throw new BadRequestException("userId can't be empty");
+        }
+
+        Contact removedContact = this.contactRepository.deleteByIdModel(contactId)
+                .orElseThrow(() -> new NotFoundException("Contact not found"));
+
+        if (!removedContact.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("Only contact owners can remove their contacts");
+        }
     }
 
     private boolean phoneValidation(String phone) {

@@ -1,6 +1,5 @@
 package com.root.signaturehandler.presentation.dtos.out;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
