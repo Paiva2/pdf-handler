@@ -20,17 +20,18 @@ public class SpringSecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(@NotNull HttpSecurity http) throws Exception {
-        DefaultSecurityFilterChain securityConfig = http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        DefaultSecurityFilterChain securityConfig = http.cors().and().csrf().disable()
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                     req.antMatchers(HttpMethod.POST, "/api/v1/user/login").permitAll();
                     req.antMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll();
                     req.anyRequest().authenticated();
-                })
-                .addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class)
+                }).addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
 
         return securityConfig;
     }
+
+
 }

@@ -36,7 +36,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserAuthenticatedDTO> authenticateUser(@RequestBody @Valid AuthUserDTO dto) {
+    public ResponseEntity<UserAuthenticatedDTO> authenticateUser(
+            @RequestBody @Valid AuthUserDTO dto) {
 
         User authenticated = this.userService.authUser(dto.toUser());
 
@@ -49,37 +50,26 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<FetchUserProfileDTO> fetchProfile(
-            @RequestHeader(name = "Authorization") String authorizationHeader
-    ) {
+            @RequestHeader(name = "Authorization") String authorizationHeader) {
         String parseToken = this.jwtAdapter.verify(authorizationHeader.replace("Bearer ", ""));
 
         User user = this.userService.getProfile(UUID.fromString(parseToken));
 
-        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getCreatedAt()
-        );
+        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(user.getId(), user.getEmail(),
+                user.getName(), user.getCreatedAt());
 
         return ResponseEntity.status(200).body(fetchProfileDto);
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<FetchUserProfileDTO> updateProfile(
-            @RequestBody UpdateUserDTO dto,
-            @RequestHeader(name = "Authorization") String authToken
-    ) {
+    public ResponseEntity<FetchUserProfileDTO> updateProfile(@RequestBody UpdateUserDTO dto,
+            @RequestHeader(name = "Authorization") String authToken) {
         String parseToken = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
 
         User updatedUser = this.userService.updateProfile(dto.toUser(UUID.fromString(parseToken)));
 
-        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(
-                updatedUser.getId(),
-                updatedUser.getEmail(),
-                updatedUser.getName(),
-                updatedUser.getCreatedAt()
-        );
+        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(updatedUser.getId(),
+                updatedUser.getEmail(), updatedUser.getName(), updatedUser.getCreatedAt());
 
         return ResponseEntity.status(201).body(fetchProfileDto);
     }
