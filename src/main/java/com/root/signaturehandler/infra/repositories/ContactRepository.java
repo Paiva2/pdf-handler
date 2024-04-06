@@ -32,4 +32,8 @@ public interface ContactRepository extends JpaRepository<Contact, UUID>, Contact
     @Override
     @Query(value = "DELETE FROM tb_contacts WHERE id = :contactId RETURNING *", nativeQuery = true)
     Optional<Contact> deleteByIdModel(UUID contactId);
+
+    @Override
+    @Query("SELECT c FROM Contact c INNER JOIN FETCH c.user u WHERE c.id = :contactId")
+    Optional<Contact> findById(UUID contactId);
 }

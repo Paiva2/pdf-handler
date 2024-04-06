@@ -21,4 +21,6 @@ public interface ContactModel {
     Optional<Contact> findByUserId(UUID contactId, UUID userId);
 
     Optional<Contact> deleteByIdModel(UUID contactId);
+    
+    Optional<Contact> findById(UUID contactId);
 }

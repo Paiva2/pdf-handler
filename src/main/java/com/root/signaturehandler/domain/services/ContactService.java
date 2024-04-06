@@ -2,13 +2,18 @@ package com.root.signaturehandler.domain.services;
 
 import com.root.signaturehandler.domain.entities.Contact;
 import com.root.signaturehandler.domain.entities.User;
+import com.root.signaturehandler.domain.utils.ClassPropertiesAdapter;
 import com.root.signaturehandler.infra.repositories.ContactRepository;
 import com.root.signaturehandler.infra.repositories.UserRepository;
 import com.root.signaturehandler.infra.specifications.ContactSpecification;
+import com.root.signaturehandler.presentation.dtos.in.contact.EditContactDTO;
 import com.root.signaturehandler.presentation.exceptions.BadRequestException;
 import com.root.signaturehandler.presentation.exceptions.ConflictException;
 import com.root.signaturehandler.presentation.exceptions.ForbiddenException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +22,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.beans.PropertyDescriptor;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -103,6 +111,38 @@ public class ContactService {
         Page<Contact> getContacts = this.contactRepository.findAll(filters, pageable);
 
         return getContacts;
+    }
+
+    public Contact editContact(UUID userId, UUID contactId, EditContactDTO editContactDTO) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be empty");
+        }
+
+        if (editContactDTO == null) {
+            throw new BadRequestException("editContactDTO can't be empty");
+        }
+
+        Optional<Contact> doesContactExists = this.contactRepository.findById(
+                contactId
+        );
+
+        if (!doesContactExists.isPresent()) {
+            throw new NotFoundException("Contact not found");
+        }
+
+        Contact contact = doesContactExists.get();
+
+        if (!contact.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("Only contact owners can delete their own contacts");
+        }
+
+        ClassPropertiesAdapter classPropertiesAdapter = new ClassPropertiesAdapter<>(contact, editContactDTO);
+
+        classPropertiesAdapter.copyNonNullProperties();
+
+        Contact updatedContact = this.contactRepository.save(contact);
+
+        return updatedContact;
     }
 
     @Transactional

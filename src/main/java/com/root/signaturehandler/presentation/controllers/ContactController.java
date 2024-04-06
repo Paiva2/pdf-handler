@@ -2,6 +2,7 @@ package com.root.signaturehandler.presentation.controllers;
 
 import com.root.signaturehandler.domain.entities.Contact;
 import com.root.signaturehandler.domain.services.ContactService;
+import com.root.signaturehandler.presentation.dtos.in.contact.EditContactDTO;
 import com.root.signaturehandler.presentation.dtos.in.contact.RegisterContactDTO;
 import com.root.signaturehandler.presentation.dtos.out.ContactResponseDTO;
 import com.root.signaturehandler.presentation.dtos.out.ListAllContactsResponseDTO;
@@ -69,6 +70,31 @@ public class ContactController {
                 contactsPageable.getSize(),
                 contactsPageable.getNumber()
         ));
+    }
+
+    @PatchMapping("/update/{contactId}")
+    public ResponseEntity<ContactResponseDTO> editContactInfos(
+            @RequestBody EditContactDTO editContactDTO,
+            @RequestHeader(name = "Authorization") String authToken,
+            @PathVariable(name = "contactId") UUID contactId
+    ) {
+        String parseTokenSub = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        Contact updatedContact = this.contactService.editContact(
+                UUID.fromString(parseTokenSub),
+                contactId,
+                editContactDTO
+        );
+
+        ContactResponseDTO contactResponseDTO = new ContactResponseDTO(
+                updatedContact.getId(),
+                updatedContact.getName(),
+                updatedContact.getEmail(),
+                updatedContact.getPhone(),
+                updatedContact.getCreatedAt().toString()
+        );
+
+        return ResponseEntity.status(201).body(contactResponseDTO);
     }
 
     @DeleteMapping("{contactId}")
