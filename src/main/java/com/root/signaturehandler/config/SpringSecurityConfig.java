@@ -11,6 +11,8 @@ import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -20,7 +22,16 @@ public class SpringSecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(@NotNull HttpSecurity http) throws Exception {
-        DefaultSecurityFilterChain securityConfig = http.cors().and().csrf().disable()
+        DefaultSecurityFilterChain securityConfig = http.cors()
+                .configurationSource(c -> {
+                    CorsConfiguration cfg = new CorsConfiguration();
+                    cfg.addAllowedMethod(CorsConfiguration.ALL);
+                    cfg.addAllowedOrigin("*");
+                    cfg.addAllowedHeader("*");
+
+                    return cfg;
+                })
+                .and().csrf().disable()
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
