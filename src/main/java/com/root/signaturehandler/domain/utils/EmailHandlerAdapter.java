@@ -27,4 +27,15 @@ public class EmailHandlerAdapter implements MailHandlerModel {
 
         this.javaMailSender.send(simpleMailMessage);
     }
+
+    public void sendNewPasswordMailMessage(String emailTo, String newPassword) {
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setFrom(this.mailFrom);
+        simpleMailMessage.setSubject("New password request!");
+        simpleMailMessage.setTo(emailTo);
+        simpleMailMessage.setText("A new password was requested to your account, use this new password to sign in: "
+                + newPassword + "\nDon't forget to store it on a safe place ;)");
+
+        this.javaMailSender.send(simpleMailMessage);
+    }
 }

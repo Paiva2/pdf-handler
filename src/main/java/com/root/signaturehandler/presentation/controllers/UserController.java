@@ -1,6 +1,7 @@
 package com.root.signaturehandler.presentation.controllers;
 
 import com.root.signaturehandler.presentation.dtos.in.user.AuthUserDTO;
+import com.root.signaturehandler.presentation.dtos.in.user.ForgotPasswordDTO;
 import com.root.signaturehandler.presentation.dtos.in.user.RegisterUserDTO;
 import com.root.signaturehandler.presentation.dtos.in.user.UpdateUserDTO;
 import com.root.signaturehandler.presentation.dtos.out.FetchUserProfileDTO;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -50,7 +53,8 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<FetchUserProfileDTO> fetchProfile(
-            @RequestHeader(name = "Authorization") String authorizationHeader) {
+            @RequestHeader(name = "Authorization") String authorizationHeader
+    ) {
         String parseToken = this.jwtAdapter.verify(authorizationHeader.replace("Bearer ", ""));
 
         User user = this.userService.getProfile(UUID.fromString(parseToken));
@@ -62,8 +66,10 @@ public class UserController {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<FetchUserProfileDTO> updateProfile(@RequestBody UpdateUserDTO dto,
-            @RequestHeader(name = "Authorization") String authToken) {
+    public ResponseEntity<FetchUserProfileDTO> updateProfile(
+            @RequestBody @Valid UpdateUserDTO dto,
+            @RequestHeader(name = "Authorization") String authToken
+    ) {
         String parseToken = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
 
         User updatedUser = this.userService.updateProfile(dto.toUser(UUID.fromString(parseToken)));
@@ -72,5 +78,16 @@ public class UserController {
                 updatedUser.getEmail(), updatedUser.getName(), updatedUser.getCreatedAt());
 
         return ResponseEntity.status(201).body(fetchProfileDto);
+    }
+
+    @PatchMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPasswordUpdate(
+            @RequestBody @Valid ForgotPasswordDTO forgotPasswordDTO
+    ) {
+        this.userService.forgotPassword(forgotPasswordDTO.toEntity());
+
+        return ResponseEntity.status(201).body(
+                Collections.singletonMap("message", "A new password was sent to your e-mail!")
+        );
     }
 }

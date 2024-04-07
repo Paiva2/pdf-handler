@@ -1,6 +1,7 @@
 package com.root.signaturehandler.domain.services;
 
 import com.root.signaturehandler.domain.entities.User;
+import com.root.signaturehandler.domain.utils.EmailHandlerAdapter;
 import com.root.signaturehandler.domain.utils.EncrypterHandler;
 import com.root.signaturehandler.presentation.exceptions.BadRequestException;
 import com.root.signaturehandler.presentation.exceptions.ConflictException;
@@ -11,6 +12,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.beans.PropertyDescriptor;
 import java.util.*;
 
@@ -18,10 +20,12 @@ import java.util.*;
 public class UserService {
     private final UserRepository userRepository;
     private final EncrypterHandler encrypterHandler;
+    private final EmailHandlerAdapter emailHandlerAdapter;
 
-    public UserService(UserRepository userRepository, EncrypterHandler encrypterHandler) {
+    public UserService(UserRepository userRepository, EncrypterHandler encrypterHandler, EmailHandlerAdapter emailHandlerAdapter) {
         this.userRepository = userRepository;
         this.encrypterHandler = encrypterHandler;
+        this.emailHandlerAdapter = emailHandlerAdapter;
     }
 
     public User registerUser(User newUser) {
@@ -128,5 +132,36 @@ public class UserService {
         }
 
         return this.userRepository.save(doesUserExists.get());
+    }
+
+    @Transactional
+    public void forgotPassword(User userRequesting) {
+        if (userRequesting == null) {
+            throw new BadRequestException("User can't be null");
+        }
+
+        if (userRequesting.getEmail() == null) {
+            throw new BadRequestException("User email can't be null");
+        }
+
+        Optional<User> doesUserExists = this.userRepository.findByEmail(userRequesting.getEmail());
+
+        if (!doesUserExists.isPresent()) {
+            throw new NotFoundException("User not found");
+        }
+
+        User user = doesUserExists.get();
+        String newPassword = user.updatePasswordToRandom();
+
+        String hashedNewPassword = this.encrypterHandler.encrypt(user.getPassword());
+
+        user.setPassword(hashedNewPassword);
+
+        this.emailHandlerAdapter.sendNewPasswordMailMessage(
+                user.getEmail(),
+                newPassword
+        );
+
+        this.userRepository.save(user);
     }
 }

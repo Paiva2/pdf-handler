@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,8 +28,10 @@ public class ContactController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<ContactResponseDTO> registerContact(@RequestBody RegisterContactDTO dto,
-                                                              @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<ContactResponseDTO> registerContact(
+            @RequestBody @Valid RegisterContactDTO dto,
+            @RequestHeader("Authorization") String authToken
+    ) {
         String parseToken = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
 
         Contact newContact =
@@ -47,7 +50,8 @@ public class ContactController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "5") int size,
             @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "email", required = false) String email) throws NumberFormatException {
+            @RequestParam(name = "email", required = false) String email
+    ) throws NumberFormatException {
         String parseTokenSubject = this.jwtAdapter.verify(authToken.replace("Bearer", ""));
 
         Page<Contact> contactsPageable = this.contactService
@@ -74,7 +78,7 @@ public class ContactController {
 
     @PatchMapping("/update/{contactId}")
     public ResponseEntity<ContactResponseDTO> editContactInfos(
-            @RequestBody EditContactDTO editContactDTO,
+            @RequestBody @Valid EditContactDTO editContactDTO,
             @RequestHeader(name = "Authorization") String authToken,
             @PathVariable(name = "contactId") UUID contactId
     ) {
@@ -98,8 +102,10 @@ public class ContactController {
     }
 
     @DeleteMapping("{contactId}")
-    public ResponseEntity<Void> deleteContact(@PathVariable(name = "contactId") UUID contactId,
-                                              @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Void> deleteContact(
+            @PathVariable(name = "contactId") UUID contactId,
+            @RequestHeader("Authorization") String authToken
+    ) {
         String parseTokenSubject = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
 
         this.contactService.removeContact(UUID.fromString(parseTokenSubject), contactId);

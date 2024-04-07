@@ -37,6 +37,7 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests(req -> {
                     req.antMatchers(HttpMethod.POST, "/api/v1/user/login").permitAll();
                     req.antMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll();
+                    req.antMatchers(HttpMethod.PATCH, "/api/v1/user/forgot-password").permitAll();
                     req.anyRequest().authenticated();
                 }).addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -48,4 +48,13 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Contact> contacts;
+
+    public String updatePasswordToRandom() {
+        String randomChars = UUID.randomUUID().toString();
+        String randomPassword = randomChars.concat(String.valueOf(Math.random()));
+
+        this.password = randomPassword;
+
+        return this.password;
+    }
 }

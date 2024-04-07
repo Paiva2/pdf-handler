@@ -70,7 +70,7 @@ public class FolderController {
     public ResponseEntity<FolderNoDocsResponseDTO> updateFolder(
             @RequestHeader(name = "Authorization") String authToken,
             @PathVariable(name = "folderId") Long folderId,
-            @RequestBody UpdateFolderDTO updateFolderDto
+            @RequestBody @Valid UpdateFolderDTO updateFolderDto
     ) {
         String parseTokenSub = this.jwtAdapter.verify(authToken.replace("Bearer", ""));
 
