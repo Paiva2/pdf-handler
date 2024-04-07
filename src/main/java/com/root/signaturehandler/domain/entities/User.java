@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-@Entity()
+@Entity
 @Table(name = "tb_users")
 public class User implements Serializable {
     @Id()
@@ -32,6 +32,9 @@ public class User implements Serializable {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = true, name = "profile_picture")
+    private String profilePicture;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
