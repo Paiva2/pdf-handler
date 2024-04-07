@@ -19,12 +19,15 @@ public class UpdateUserDTO {
     @Size(min = 3, message = "name must have at least 3 characters")
     private String name;
 
+    private String profilePicture;
+
     public User toUser(UUID id) {
         User user = new User();
         user.setId(id);
         user.setEmail(this.email);
         user.setPassword(this.password);
         user.setName(this.name);
+        user.setProfilePicture(this.profilePicture);
 
         return user;
     }

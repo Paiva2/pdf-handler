@@ -25,11 +25,14 @@ public class RegisterUserDTO {
     @Length(min = 6, message = "password must have at least 6 characters")
     private String password;
 
+    private String profilePicture;
+
     public User toUser() {
         User user = new User();
         user.setName(this.name);
         user.setEmail(this.email);
         user.setPassword(this.password);
+        user.setProfilePicture(this.profilePicture);
 
         return user;
     }
