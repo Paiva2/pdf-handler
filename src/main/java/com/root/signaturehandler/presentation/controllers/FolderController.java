@@ -3,6 +3,8 @@ package com.root.signaturehandler.presentation.controllers;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.services.FolderService;
 import com.root.signaturehandler.presentation.dtos.in.folder.CreateFolderDTO;
+import com.root.signaturehandler.presentation.dtos.in.folder.UpdateFolderDTO;
+import com.root.signaturehandler.presentation.dtos.out.FolderNoDocsResponseDTO;
 import com.root.signaturehandler.presentation.dtos.out.FolderResponseDTO;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
 import org.springframework.http.ResponseEntity;
@@ -59,5 +61,31 @@ public class FolderController {
         );
 
         return ResponseEntity.status(200).body(folderResponseDTO);
+    }
+
+    @PatchMapping("/update/{folderId}")
+    public ResponseEntity<FolderNoDocsResponseDTO> updateFolder(
+            @RequestHeader(name = "Authorization") String authToken,
+            @PathVariable(name = "folderId") Long folderId,
+            @RequestBody UpdateFolderDTO updateFolderDto
+    ) {
+        String parseTokenSub = this.jwtAdapter.verify(authToken.replace("Bearer", ""));
+
+        Folder folder = new Folder();
+        folder.setName(updateFolderDto.getName());
+
+        Folder updatedFolder = this.folderService.editFolder(
+                UUID.fromString(parseTokenSub),
+                folderId,
+                folder
+        );
+
+        FolderNoDocsResponseDTO folderResponseDTO = new FolderNoDocsResponseDTO(
+                updatedFolder.getId(),
+                updatedFolder.getName(),
+                updatedFolder.getCreatedAt().toString()
+        );
+
+        return ResponseEntity.status(201).body(folderResponseDTO);
     }
 }

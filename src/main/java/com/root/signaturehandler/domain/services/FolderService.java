@@ -2,6 +2,7 @@ package com.root.signaturehandler.domain.services;
 
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.entities.User;
+import com.root.signaturehandler.domain.utils.ClassPropertiesAdapter;
 import com.root.signaturehandler.infra.repositories.FolderRepository;
 import com.root.signaturehandler.infra.repositories.UserRepository;
 import com.root.signaturehandler.presentation.exceptions.BadRequestException;
@@ -72,5 +73,34 @@ public class FolderService {
         }
 
         return doesUserHasFolder.get();
+    }
+
+    public Folder editFolder(UUID userId, Long folderId, Folder folderUpdate) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be empty");
+        }
+
+        if (folderId == null) {
+            throw new BadRequestException("folderId can't be empty");
+        }
+
+        if (folderUpdate == null) {
+            throw new BadRequestException("folderId can't be empty");
+        }
+
+        Optional<Folder> doesFolderExists = this.folderRepository.findUserFolderById(
+                userId,
+                folderId
+        );
+
+        if (!doesFolderExists.isPresent()) {
+            throw new NotFoundException("Folder not found");
+        }
+
+        new ClassPropertiesAdapter<>(doesFolderExists.get(), folderUpdate).copyNonNullProperties();
+
+        Folder folderUpdated = this.folderRepository.save(doesFolderExists.get());
+
+        return folderUpdated;
     }
 }

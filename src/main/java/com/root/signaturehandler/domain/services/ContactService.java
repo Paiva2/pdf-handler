@@ -136,9 +136,7 @@ public class ContactService {
             throw new ForbiddenException("Only contact owners can delete their own contacts");
         }
 
-        ClassPropertiesAdapter classPropertiesAdapter = new ClassPropertiesAdapter<>(contact, editContactDTO);
-
-        classPropertiesAdapter.copyNonNullProperties();
+        new ClassPropertiesAdapter<>(contact, editContactDTO).copyNonNullProperties();
 
         Contact updatedContact = this.contactRepository.save(contact);
 
