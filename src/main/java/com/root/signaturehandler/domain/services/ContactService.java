@@ -93,8 +93,8 @@ public class ContactService {
 
         if (size < 5) {
             size = 5;
-        } else if (size > 100) {
-            size = 100;
+        } else if (size > 50) {
+            size = 50;
         }
 
         Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");

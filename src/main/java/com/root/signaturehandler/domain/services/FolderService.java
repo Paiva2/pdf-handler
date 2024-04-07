@@ -5,11 +5,18 @@ import com.root.signaturehandler.domain.entities.User;
 import com.root.signaturehandler.domain.utils.ClassPropertiesAdapter;
 import com.root.signaturehandler.infra.repositories.FolderRepository;
 import com.root.signaturehandler.infra.repositories.UserRepository;
+import com.root.signaturehandler.infra.specifications.FolderSpecification;
 import com.root.signaturehandler.presentation.exceptions.BadRequestException;
 import com.root.signaturehandler.presentation.exceptions.ConflictException;
 import com.root.signaturehandler.presentation.exceptions.NotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,10 +24,12 @@ import java.util.UUID;
 public class FolderService {
     private final UserRepository userRepository;
     private final FolderRepository folderRepository;
+    private final FolderSpecification folderSpecification;
 
-    public FolderService(UserRepository userRepository, FolderRepository folderRepository) {
+    public FolderService(UserRepository userRepository, FolderRepository folderRepository, FolderSpecification folderSpecification) {
         this.userRepository = userRepository;
         this.folderRepository = folderRepository;
+        this.folderSpecification = folderSpecification;
     }
 
     public Folder createFolder(UUID folderOwnerId, Folder newFolder) {
@@ -102,5 +111,30 @@ public class FolderService {
         Folder folderUpdated = this.folderRepository.save(doesFolderExists.get());
 
         return folderUpdated;
+    }
+
+    public Page<Folder> listFolders(UUID userId, String folderName, int page, int perPage) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be empty");
+        }
+
+        if (page < 0) {
+            page = 1;
+        }
+
+        if (perPage < 5) {
+            perPage = 5;
+        } else if (perPage > 50) {
+            perPage = 50;
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, perPage, Sort.Direction.ASC, "createdAt");
+
+        Specification<Folder> filters = Specification.where(this.folderSpecification.userIdEq(userId))
+                .and(folderName != null ? this.folderSpecification.folderNameLike(folderName) : null);
+
+        Page<Folder> folders = this.folderRepository.findAll(filters, pageable);
+
+        return folders;
     }
 }

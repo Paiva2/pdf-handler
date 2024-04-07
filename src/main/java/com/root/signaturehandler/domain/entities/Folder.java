@@ -39,7 +39,7 @@ public class Folder implements Serializable {
     @JoinColumn(name = "fk_user")
     private User user;
 
-    @OneToMany(mappedBy = "folder", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     List<Document> documents;
 }
