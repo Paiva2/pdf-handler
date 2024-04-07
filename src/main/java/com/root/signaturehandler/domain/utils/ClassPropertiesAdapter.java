@@ -2,10 +2,11 @@ package com.root.signaturehandler.domain.utils;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.stereotype.Component;
 
-import java.beans.PropertyDescriptor;
+import java.beans.FeatureDescriptor;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClassPropertiesAdapter<T> {
     BeanWrapper target;
@@ -14,25 +15,32 @@ public class ClassPropertiesAdapter<T> {
     public ClassPropertiesAdapter(T target, T source) throws RuntimeException {
         this.target = new BeanWrapperImpl(target);
         this.source = new BeanWrapperImpl(source);
-        
+
         if (!this.target.getClass().equals(this.source.getClass())) {
             throw new IllegalArgumentException("Classes must be equals to have their values copied.");
         }
     }
 
     public void copyNonNullProperties() {
-        PropertyDescriptor[] fields = this.source.getPropertyDescriptors();
+        List<String> targetFields = Arrays.stream(
+                this.target.getPropertyDescriptors()
+        ).map(FeatureDescriptor::getName).collect(Collectors.toList());
 
-        Arrays.stream(fields).forEach(field -> {
-            String fieldName = field.getName();
-            Object fieldValue = this.source.getPropertyValue(fieldName);
+        Arrays.stream(this.source.getPropertyDescriptors())
+                .filter(field -> {
+                    return this.source.getPropertyValue(field.getName()) != null
+                            && field.getName().hashCode() != "class".hashCode()
+                            && field.getName().hashCode() != "id".hashCode();
+                })
+                .forEach(field -> {
+                    boolean targetHasField = targetFields.contains(field.getName());
 
-            boolean nonUpdatableField =
-                    fieldName.hashCode() == "class".hashCode() || fieldName.hashCode() == "id".hashCode();
+                    if (!targetHasField) return;
 
-            if (!nonUpdatableField && fieldValue != null) {
-                this.target.setPropertyValue(fieldName, fieldValue);
-            }
-        });
+                    String fieldName = field.getName();
+                    Object fieldValue = this.source.getPropertyValue(fieldName);
+
+                    this.target.setPropertyValue(fieldName, fieldValue);
+                });
     }
 }
