@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.beans.PropertyDescriptor;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Service
@@ -134,6 +131,36 @@ public class ContactService {
 
         if (!contact.getUser().getId().equals(userId)) {
             throw new ForbiddenException("Only contact owners can delete their own contacts");
+        }
+
+        Specification<Contact> buildQueryToCheckContactExistence =
+                Specification.where(this.contactSpecification.userIdEq(userId))
+                        .and(editContactDTO.getEmail() != null ?
+                                this.contactSpecification.emailEq(editContactDTO.getEmail()) : null)
+                        .or(Specification.where(this.contactSpecification.userIdEq(userId))
+                                .and(editContactDTO.getPhone() != null ?
+                                        this.contactSpecification.phoneEq(editContactDTO.getPhone()) : null)
+                        );
+
+        List<Contact> doesUserAlreadyHasAnContactWithInfos =
+                this.contactRepository.findAll(buildQueryToCheckContactExistence);
+        
+        if (!doesUserAlreadyHasAnContactWithInfos.isEmpty()) {
+            List<String> duplicateErrors = new ArrayList<>();
+
+            doesUserAlreadyHasAnContactWithInfos.forEach(existentContact -> {
+                if (existentContact.getEmail().equals(editContactDTO.getEmail())) {
+                    duplicateErrors.add("Your contact list already has an contact with this e-mail");
+                }
+
+                if (existentContact.getPhone().equals(editContactDTO.getPhone())) {
+                    duplicateErrors.add("Your contact list already has an contact with this phone");
+                }
+            });
+
+            if (!duplicateErrors.isEmpty()) {
+                throw new ConflictException(duplicateErrors);
+            }
         }
 
         new ClassPropertiesAdapter<>(contact, editContactDTO).copyNonNullProperties();

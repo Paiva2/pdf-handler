@@ -14,16 +14,12 @@ import javax.validation.constraints.*;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EditContactDTO {
-    @NotBlank(message = "name can't be blank")
-    @NotNull(message = "name can't be null")
+    @Size(min = 3, message = "Contact name must have at least 3 characters")
     private String name;
 
-    @Email(message = "email must be an valid e-mail")
-    @NotBlank(message = "email can't be blank")
-    @NotNull(message = "email can't be null")
+    @Email(message = "Email must be an valid e-mail")
     private String email;
 
     @Pattern(regexp = "^([+]?[\\s0-9]+)?(\\d{3}|[(]?[0-9]+[)])?([-]?[\\s]?[0-9])+$")
-    @NotNull(message = "phone can't be null")
     private String phone;
 }

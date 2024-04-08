@@ -22,4 +22,12 @@ public class ContactSpecification {
     public Specification<Contact> emailLike(String emailLike) {
         return (root, query, builder) -> builder.like(root.get("email"), "%" + emailLike + "%");
     }
+
+    public Specification<Contact> phoneEq(String phoneEq) {
+        return (root, query, builder) -> builder.equal(root.get("phone"), phoneEq);
+    }
+
+    public Specification<Contact> emailEq(String emailEq) {
+        return (root, query, builder) -> builder.equal(root.get("email"), emailEq);
+    }
 }
