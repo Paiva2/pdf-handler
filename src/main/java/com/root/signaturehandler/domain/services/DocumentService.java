@@ -99,6 +99,8 @@ public class DocumentService {
 
         List<DocumentAttachment> newAttachmentsForDocument = new ArrayList<>();
 
+        String documentUrl = this.uploadDocument(document);
+        
         contactsForSendDto.forEach(contactForSend -> {
             Optional<Contact> contact = userContactsToReceive
                     .stream()
@@ -114,19 +116,6 @@ public class DocumentService {
             attachment.setDocument(createDoc);
             attachment.setContact(contact.get());
             attachment.setSendBy(contactForSend.getSendBy());
-
-            String documentUrl;
-
-            try {
-                this.fileUploaderAdapter.setDocumentsDestination(this.destinationForDocuments);
-                documentUrl = this.fileUploaderAdapter.uploadDocument(
-                        document.getOriginalFile(),
-                        document.getFileName()
-                );
-            } catch (IOException exception) {
-                System.out.println(exception.getMessage());
-                throw new BadRequestException("There was an error uploading the document...");
-            }
 
             if (attachment.getSendBy() == SendBy.EMAIL) {
                 this.emailHandlerAdapter.sendDocumentMailMessage(
@@ -145,6 +134,21 @@ public class DocumentService {
         createDoc.setDocumentAttachments(newAttachments);
 
         return createDoc;
+    }
+
+    private String uploadDocument(Document document) {
+        try {
+            this.fileUploaderAdapter.setDocumentsDestination(this.destinationForDocuments);
+            String documentUrl = this.fileUploaderAdapter.uploadDocument(
+                    document.getOriginalFile(),
+                    document.getFileName()
+            );
+
+            return documentUrl;
+        } catch (IOException exception) {
+            System.out.println(exception.getMessage());
+            throw new BadRequestException("There was an error uploading the document...");
+        }
     }
 
     private String randomFileName(String originalFileName) {

@@ -33,6 +33,13 @@ public class Document {
     @Column(name = "file_binary", nullable = false)
     private byte[] fileBinary;
 
+    @Column(nullable = false)
+    private Boolean disabled = false;
+
+    @CreatedDate
+    @Column(name = "deleted_at", nullable = true)
+    private Date deletedAt;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt = new Date();
