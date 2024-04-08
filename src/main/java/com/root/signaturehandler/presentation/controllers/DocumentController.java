@@ -66,4 +66,19 @@ public class DocumentController {
 
         return ResponseEntity.status(201).body(newDocumentResponseDTO);
     }
+
+    @DeleteMapping("/delete/{documentId}")
+    public ResponseEntity<Void> deleteDocument(
+            @RequestHeader("Authorization") String authToken,
+            @PathVariable(name = "documentId") UUID documentId
+    ) {
+        String parseTokenSub = this.jwtAdapter.verify(authToken.replace("Bearer", ""));
+
+        this.documentService.deleteDocument(
+                UUID.fromString(parseTokenSub),
+                documentId
+        );
+
+        return ResponseEntity.status(204).build();
+    }
 }

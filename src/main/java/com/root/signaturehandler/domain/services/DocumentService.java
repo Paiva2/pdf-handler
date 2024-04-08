@@ -12,9 +12,7 @@ import com.root.signaturehandler.infra.repositories.DocumentAttachmentRepository
 import com.root.signaturehandler.infra.repositories.DocumentRepository;
 import com.root.signaturehandler.infra.repositories.FolderRepository;
 import com.root.signaturehandler.presentation.dtos.in.contact.ContactForSendDTO;
-import com.root.signaturehandler.presentation.exceptions.BadRequestException;
-import com.root.signaturehandler.presentation.exceptions.MailNotFoundException;
-import com.root.signaturehandler.presentation.exceptions.NotFoundException;
+import com.root.signaturehandler.presentation.exceptions.*;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,7 +85,11 @@ public class DocumentService {
         }
 
         document.setFolder(doesFolderExists.get());
-        Document createDoc = this.documentRepository.save(document);
+
+        String documentUrl = this.uploadDocument(document);
+        document.setDocumentUrl(documentUrl);
+
+        Document docCreated = this.documentRepository.save(document);
 
         List<Contact> userContactsToReceive = this.contactRepository.findContactsByIdByUserId(
                 userId,
@@ -99,8 +101,62 @@ public class DocumentService {
 
         List<DocumentAttachment> newAttachmentsForDocument = new ArrayList<>();
 
-        String documentUrl = this.uploadDocument(document);
-        
+        this.handleDocumentContactList(
+                contactsForSendDto,
+                newAttachmentsForDocument,
+                documentUrl,
+                docCreated,
+                userContactsToReceive
+        );
+
+        List<DocumentAttachment> newAttachments = this.documentAttachmentRepository.saveAll(
+                newAttachmentsForDocument
+        );
+
+        docCreated.setDocumentAttachments(newAttachments);
+
+        return docCreated;
+    }
+
+    public Document deleteDocument(UUID userId, UUID documentId) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be null");
+        }
+
+        if (documentId == null) {
+            throw new BadRequestException("documentId can't be null");
+        }
+
+        Optional<Document> doesDocumentExists = this.documentRepository.findByIdAndUserId(documentId, userId);
+
+        if (!doesDocumentExists.isPresent()) {
+            throw new NotFoundException("Document not found");
+        }
+
+        Document document = doesDocumentExists.get();
+
+        if (document.getDisabled()) {
+            throw new UnprocessableEntityException("Document is already disabled");
+        }
+
+        if (!document.getFolder().getUser().getId().equals(userId)) {
+            throw new ForbiddenException("Only document owner can manage their documents");
+        }
+
+        document.setDisabled(true);
+
+        Document disableDocument = this.documentRepository.save(document);
+
+        return disableDocument;
+    }
+
+    private void handleDocumentContactList(
+            List<ContactForSendDTO> contactsForSendDto,
+            List<DocumentAttachment> newAttachmentsForDocument,
+            String documentUrl,
+            Document docCreated,
+            List<Contact> userContactsToReceive
+    ) {
         contactsForSendDto.forEach(contactForSend -> {
             Optional<Contact> contact = userContactsToReceive
                     .stream()
@@ -113,7 +169,7 @@ public class DocumentService {
 
             DocumentAttachment attachment = new DocumentAttachment();
 
-            attachment.setDocument(createDoc);
+            attachment.setDocument(docCreated);
             attachment.setContact(contact.get());
             attachment.setSendBy(contactForSend.getSendBy());
 
@@ -126,14 +182,6 @@ public class DocumentService {
 
             newAttachmentsForDocument.add(attachment);
         });
-
-        List<DocumentAttachment> newAttachments = this.documentAttachmentRepository.saveAll(
-                newAttachmentsForDocument
-        );
-
-        createDoc.setDocumentAttachments(newAttachments);
-
-        return createDoc;
     }
 
     private String uploadDocument(Document document) {

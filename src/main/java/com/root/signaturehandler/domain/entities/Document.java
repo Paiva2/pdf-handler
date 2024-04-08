@@ -30,8 +30,11 @@ public class Document {
     @Column(name = "file_name", length = 100, nullable = false)
     private String fileName;
 
-    @Column(name = "file_binary", nullable = false)
+    @Transient
     private byte[] fileBinary;
+
+    @Column(name = "document_url", nullable = false)
+    private String documentUrl;
 
     @Column(nullable = false)
     private Boolean disabled = false;
@@ -54,7 +57,7 @@ public class Document {
     private Folder folder;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "document")
+    @OneToMany(mappedBy = "document", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DocumentAttachment> documentAttachments;
 
