@@ -106,6 +106,15 @@ public class FolderService {
             throw new NotFoundException("Folder not found");
         }
 
+        Optional<Folder> doesUserHasAnFolderWithName = this.folderRepository.findUserFolderByName(
+                userId,
+                folderUpdate.getName()
+        );
+
+        if (doesUserHasAnFolderWithName.isPresent()) {
+            throw new ConflictException("A folder with his name is already created");
+        }
+
         new ClassPropertiesAdapter<>(doesFolderExists.get(), folderUpdate).copyNonNullProperties();
 
         Folder folderUpdated = this.folderRepository.save(doesFolderExists.get());

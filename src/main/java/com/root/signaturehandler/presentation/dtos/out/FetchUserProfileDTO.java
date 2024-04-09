@@ -12,5 +12,6 @@ public class FetchUserProfileDTO {
     private UUID id;
     private String email;
     private String name;
+    private String profilePicture;
     private Date createdAt;
 }

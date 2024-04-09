@@ -19,7 +19,8 @@ import java.util.UUID;
 public interface FolderRepository extends JpaRepository<Folder, Long>, FolderModel, JpaSpecificationExecutor<Folder> {
     @Override
     @Query("SELECT fold FROM Folder fold" +
-            " LEFT JOIN FETCH fold.user usr INNER JOIN FETCH fold.documents doc " +
+            " LEFT JOIN FETCH fold.user usr " +
+            " LEFT JOIN FETCH fold.documents doc " +
             " WHERE fold.user.id = :userId AND fold.name = :folderName"
     )
     Optional<Folder> findUserFolderByName(UUID userId, String folderName);

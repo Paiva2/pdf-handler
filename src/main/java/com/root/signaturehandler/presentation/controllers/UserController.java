@@ -59,8 +59,13 @@ public class UserController {
 
         User user = this.userService.getProfile(UUID.fromString(parseToken));
 
-        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(user.getId(), user.getEmail(),
-                user.getName(), user.getCreatedAt());
+        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getProfilePicture(),
+                user.getCreatedAt()
+        );
 
         return ResponseEntity.status(200).body(fetchProfileDto);
     }
@@ -74,8 +79,13 @@ public class UserController {
 
         User updatedUser = this.userService.updateProfile(dto.toUser(UUID.fromString(parseToken)));
 
-        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(updatedUser.getId(),
-                updatedUser.getEmail(), updatedUser.getName(), updatedUser.getCreatedAt());
+        FetchUserProfileDTO fetchProfileDto = new FetchUserProfileDTO(
+                updatedUser.getId(),
+                updatedUser.getEmail(),
+                updatedUser.getName(),
+                updatedUser.getProfilePicture(),
+                updatedUser.getCreatedAt()
+        );
 
         return ResponseEntity.status(201).body(fetchProfileDto);
     }
