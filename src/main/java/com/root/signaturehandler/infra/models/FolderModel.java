@@ -17,4 +17,7 @@ public interface FolderModel {
     Optional<Folder> findById(Long id);
 
     Page<Folder> findAll(Specification<Folder> specification, Pageable pageable);
+
+    Optional<Folder> deleteByIdAndUserId(UUID userId, Long folderId);
+
 }

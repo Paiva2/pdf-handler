@@ -16,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -145,5 +144,22 @@ public class FolderService {
         Page<Folder> folders = this.folderRepository.findAll(filters, pageable);
 
         return folders;
+    }
+
+    public Folder deleteFolder(UUID userId, Long folderId) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be null");
+        }
+
+        if (folderId == null) {
+            throw new BadRequestException("folderId can't be null");
+        }
+
+        Folder deleteFolder = this.folderRepository.deleteByIdAndUserId(
+                userId,
+                folderId
+        ).orElseThrow(() -> new NotFoundException("Folder not found"));
+
+        return deleteFolder;
     }
 }

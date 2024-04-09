@@ -41,4 +41,8 @@ public interface FolderRepository extends JpaRepository<Folder, Long>, FolderMod
 
     @Override
     Page<Folder> findAll(Specification<Folder> specification, Pageable pageable);
+
+    @Override
+    @Query(value = "DELETE FROM tb_folders WHERE id = :folderId AND fk_user = :userId RETURNING *", nativeQuery = true)
+    Optional<Folder> deleteByIdAndUserId(UUID userId, Long folderId);
 }

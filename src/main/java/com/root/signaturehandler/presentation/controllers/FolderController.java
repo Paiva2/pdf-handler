@@ -125,4 +125,19 @@ public class FolderController {
 
         return ResponseEntity.status(200).body(listAllContactsResponseDTO);
     }
+
+    @DeleteMapping("/{folderId}")
+    public ResponseEntity<Void> deleteFolder(
+            @RequestHeader("Authorization") String authToken,
+            @PathVariable("folderId") String folderId
+    ) {
+        String parseTokenSub = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        this.folderService.deleteFolder(
+                UUID.fromString(parseTokenSub),
+                Long.valueOf(folderId)
+        );
+
+        return ResponseEntity.status(204).build();
+    }
 }
