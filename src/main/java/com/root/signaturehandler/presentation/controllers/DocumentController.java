@@ -3,13 +3,12 @@ package com.root.signaturehandler.presentation.controllers;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.root.signaturehandler.domain.entities.Document;
+import com.root.signaturehandler.domain.entities.DocumentAttachment;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.services.DocumentService;
 import com.root.signaturehandler.infra.models.enums.DocumentsOrderBy;
 import com.root.signaturehandler.presentation.dtos.in.contact.ContactForSendDTO;
-import com.root.signaturehandler.presentation.dtos.out.AllDocumentsDTO;
-import com.root.signaturehandler.presentation.dtos.out.DocumentResponseDTO;
-import com.root.signaturehandler.presentation.dtos.out.NewDocumentResponseDTO;
+import com.root.signaturehandler.presentation.dtos.out.*;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -109,8 +108,9 @@ public class DocumentController {
                 .map(doc -> new DocumentResponseDTO(
                         doc.getId(),
                         doc.getDocumentUrl(),
+                        null,
                         doc.getDisabled(),
-                        doc.getCreatedAt(),
+                        doc.getCreatedAt().toString(),
                         doc.getDeletedAt()
                 )).collect(Collectors.toList());
 
@@ -121,7 +121,7 @@ public class DocumentController {
                 documents.getSize(),
                 documents.getNumber() + 1
         );
-        
+
         return ResponseEntity.status(200).body(allDocumentsDTO);
     }
 
@@ -137,11 +137,28 @@ public class DocumentController {
                 documentId
         );
 
+        List<DocumentAttachmentResponseDTO> documentAttachments =
+                document.getDocumentAttachments().stream().map(attachment ->
+                        new DocumentAttachmentResponseDTO(
+                                attachment.getId(),
+                                attachment.getCreatedAt().toString(),
+                                attachment.getSendBy(),
+                                new ContactResponseDTO(
+                                        attachment.getContact().getId(),
+                                        attachment.getContact().getName(),
+                                        attachment.getContact().getEmail(),
+                                        attachment.getContact().getPhone(),
+                                        attachment.getContact().getCreatedAt().toString()
+                                )
+                        )
+                ).collect(Collectors.toList());
+
         DocumentResponseDTO documentResponseDTO = new DocumentResponseDTO(
                 document.getId(),
                 document.getDocumentUrl(),
+                documentAttachments,
                 document.getDisabled(),
-                document.getCreatedAt(),
+                document.getCreatedAt().toString(),
                 document.getDeletedAt()
         );
 

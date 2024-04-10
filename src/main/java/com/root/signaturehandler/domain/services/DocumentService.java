@@ -6,7 +6,6 @@ import com.root.signaturehandler.domain.entities.DocumentAttachment;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.utils.EmailHandlerAdapter;
 import com.root.signaturehandler.domain.utils.FileUploaderAdapter;
-import com.root.signaturehandler.infra.models.enums.DocumentsOrderBy;
 import com.root.signaturehandler.infra.models.enums.SendBy;
 import com.root.signaturehandler.infra.repositories.ContactRepository;
 import com.root.signaturehandler.infra.repositories.DocumentAttachmentRepository;
