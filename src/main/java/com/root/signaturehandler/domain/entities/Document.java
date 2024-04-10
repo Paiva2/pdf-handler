@@ -31,6 +31,7 @@ public class Document {
     private String fileName;
 
     @Transient
+    @JsonIgnore
     private byte[] fileBinary;
 
     @Column(name = "document_url", nullable = false)
@@ -62,5 +63,6 @@ public class Document {
     private List<DocumentAttachment> documentAttachments;
 
     @Transient
+    @JsonIgnore
     private MultipartFile originalFile;
 }

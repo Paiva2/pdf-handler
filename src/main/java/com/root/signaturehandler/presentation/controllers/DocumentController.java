@@ -5,9 +5,13 @@ import com.google.gson.reflect.TypeToken;
 import com.root.signaturehandler.domain.entities.Document;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.services.DocumentService;
+import com.root.signaturehandler.infra.models.enums.DocumentsOrderBy;
 import com.root.signaturehandler.presentation.dtos.in.contact.ContactForSendDTO;
+import com.root.signaturehandler.presentation.dtos.out.AllDocumentsDTO;
+import com.root.signaturehandler.presentation.dtos.out.DocumentResponseDTO;
 import com.root.signaturehandler.presentation.dtos.out.NewDocumentResponseDTO;
 import com.root.signaturehandler.presentation.utils.JwtAdapter;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/document")
@@ -80,5 +85,67 @@ public class DocumentController {
         );
 
         return ResponseEntity.status(204).build();
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<AllDocumentsDTO> listAllDocuments(
+            @RequestHeader("Authorization") String authToken,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "5") int perPage,
+            @RequestParam(name = "file", required = false) String fileName,
+            @RequestParam(name = "order", required = false, defaultValue = "ASC") DocumentsOrderBy orderBy
+    ) {
+        String parseTokenSub = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        Page<Document> documents = this.documentService.listAll(
+                UUID.fromString(parseTokenSub),
+                page,
+                perPage,
+                fileName,
+                orderBy.getOrderBy()
+        );
+
+        List<DocumentResponseDTO> documentResponseDtos = documents.getContent().stream()
+                .map(doc -> new DocumentResponseDTO(
+                        doc.getId(),
+                        doc.getDocumentUrl(),
+                        doc.getDisabled(),
+                        doc.getCreatedAt(),
+                        doc.getDeletedAt()
+                )).collect(Collectors.toList());
+
+        AllDocumentsDTO allDocumentsDTO = new AllDocumentsDTO(
+                documentResponseDtos,
+                documents.getTotalElements(),
+                documents.getTotalPages(),
+                documents.getSize(),
+                documents.getNumber() + 1
+        );
+        
+        return ResponseEntity.status(200).body(allDocumentsDTO);
+    }
+
+    @GetMapping("/{documentId}")
+    public ResponseEntity<DocumentResponseDTO> filterDocument(
+            @RequestHeader("Authorization") String authToken,
+            @PathVariable("documentId") UUID documentId
+    ) {
+        String parseTokenSub = this.jwtAdapter.verify(authToken.replace("Bearer ", ""));
+
+        Document document = this.documentService.filterDocument(
+                UUID.fromString(parseTokenSub),
+                documentId
+        );
+
+        DocumentResponseDTO documentResponseDTO = new DocumentResponseDTO(
+                document.getId(),
+                document.getDocumentUrl(),
+                document.getDisabled(),
+                document.getCreatedAt(),
+                document.getDeletedAt()
+        );
+
+
+        return ResponseEntity.status(200).body(documentResponseDTO);
     }
 }

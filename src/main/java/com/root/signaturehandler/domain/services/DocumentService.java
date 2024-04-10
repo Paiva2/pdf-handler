@@ -6,16 +6,23 @@ import com.root.signaturehandler.domain.entities.DocumentAttachment;
 import com.root.signaturehandler.domain.entities.Folder;
 import com.root.signaturehandler.domain.utils.EmailHandlerAdapter;
 import com.root.signaturehandler.domain.utils.FileUploaderAdapter;
+import com.root.signaturehandler.infra.models.enums.DocumentsOrderBy;
 import com.root.signaturehandler.infra.models.enums.SendBy;
 import com.root.signaturehandler.infra.repositories.ContactRepository;
 import com.root.signaturehandler.infra.repositories.DocumentAttachmentRepository;
 import com.root.signaturehandler.infra.repositories.DocumentRepository;
 import com.root.signaturehandler.infra.repositories.FolderRepository;
+import com.root.signaturehandler.infra.specifications.DocumentSpecification;
 import com.root.signaturehandler.presentation.dtos.in.contact.ContactForSendDTO;
 import com.root.signaturehandler.presentation.exceptions.*;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +42,7 @@ public class DocumentService {
     private final DocumentAttachmentRepository documentAttachmentRepository;
     private final EmailHandlerAdapter emailHandlerAdapter;
     private final FileUploaderAdapter fileUploaderAdapter;
+    private final DocumentSpecification documentSpecification;
 
     public DocumentService(
             FolderRepository folderRepository,
@@ -42,7 +50,7 @@ public class DocumentService {
             DocumentAttachmentRepository documentAttachmentRepository,
             ContactRepository contactRepository,
             EmailHandlerAdapter emailHandlerAdapter,
-            FileUploaderAdapter fileUploaderAdapter
+            FileUploaderAdapter fileUploaderAdapter, DocumentSpecification documentSpecification
     ) {
         this.folderRepository = folderRepository;
         this.documentRepository = documentRepository;
@@ -50,6 +58,7 @@ public class DocumentService {
         this.emailHandlerAdapter = emailHandlerAdapter;
         this.contactRepository = contactRepository;
         this.fileUploaderAdapter = fileUploaderAdapter;
+        this.documentSpecification = documentSpecification;
     }
 
     @Transactional(noRollbackFor = MailNotFoundException.class)
@@ -182,6 +191,61 @@ public class DocumentService {
 
             newAttachmentsForDocument.add(attachment);
         });
+    }
+
+    public Page<Document> listAll(UUID userId, int page, int perPage, String filename, String orderBy) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be null");
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+
+        if (perPage < 5) {
+            perPage = 5;
+        } else if (perPage > 50) {
+            perPage = 50;
+        }
+
+        Pageable pageable = PageRequest.of(
+                page - 1,
+                perPage,
+                Sort.Direction.valueOf(orderBy.toUpperCase()),
+                "createdAt"
+        );
+
+        Specification<Document> specification = Specification.where(this.documentSpecification.userIdLike(userId))
+                .and(filename != null ? this.documentSpecification.nameLike(filename) : null)
+                .and(this.documentSpecification.isDisabled(false));
+
+        Page<Document> documentList = this.documentRepository.findAll(
+                specification,
+                pageable
+        );
+
+        return documentList;
+    }
+
+    public Document filterDocument(UUID userId, UUID documentId) {
+        if (userId == null) {
+            throw new BadRequestException("userId can't be null");
+        }
+
+        if (documentId == null) {
+            throw new BadRequestException("folderId can't be null");
+        }
+
+        Optional<Document> getDocument = this.documentRepository.findByIdAndUserId(
+                documentId,
+                userId
+        );
+
+        if (!getDocument.isPresent()) {
+            throw new NotFoundException("Document not found.");
+        }
+
+        return getDocument.get();
     }
 
     private String uploadDocument(Document document) {
