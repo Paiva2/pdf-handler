@@ -16,15 +16,13 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "tb_folders", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"fk_user", "name"})
-})
+@Table(name = "tb_folders")
 public class Folder implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @CreationTimestamp

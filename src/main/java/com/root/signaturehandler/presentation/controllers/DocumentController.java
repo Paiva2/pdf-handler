@@ -107,6 +107,7 @@ public class DocumentController {
         List<DocumentResponseDTO> documentResponseDtos = documents.getContent().stream()
                 .map(doc -> new DocumentResponseDTO(
                         doc.getId(),
+                        doc.getFileName(),
                         doc.getDocumentUrl(),
                         null,
                         doc.getDisabled(),
@@ -155,6 +156,7 @@ public class DocumentController {
 
         DocumentResponseDTO documentResponseDTO = new DocumentResponseDTO(
                 document.getId(),
+                document.getFileName(),
                 document.getDocumentUrl(),
                 documentAttachments,
                 document.getDisabled(),

@@ -55,6 +55,8 @@ public class FolderService {
         Optional<Folder> doesFolderExists =
                 this.folderRepository.findUserFolderByName(folderOwnerId, newFolder.getName());
 
+        System.out.println(doesFolderExists.isPresent());
+
         if (doesFolderExists.isPresent()) {
             throw new ConflictException("User already has a folder with this name");
         }

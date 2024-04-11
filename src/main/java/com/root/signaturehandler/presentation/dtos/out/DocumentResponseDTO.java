@@ -16,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DocumentResponseDTO {
     private UUID id;
+    private String fileName;
     private String documentUrl;
     private List<DocumentAttachmentResponseDTO> documentAttachments;
     private boolean disabled;
